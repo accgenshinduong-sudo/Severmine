@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>🎮 Minecraft Server Panel</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/utilities.css">
+</head>
+<body>
+    <!-- Login Screen -->
+    <div class="login-screen" id="loginScreen">
+        <div class="login-card">
+            <div class="login-icon">🎮</div>
+            <h1>Minecraft Server Panel</h1>
+            <p>Đăng nhập để quản lý server của bạn</p>
+            <div class="login-input-wrapper">
+                <div class="login-input-icon">🔒</div>
+                <input type="password" class="login-input" id="loginPass" placeholder="Nhập mật khẩu..." autocomplete="off">
+            </div>
+            <button class="login-btn" id="loginBtn"><span>🔓 Đăng Nhập</span></button>
+            <p class="login-error" id="loginError">❌ Mật khẩu không đúng!</p>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Main App -->
+    <div class="app">
+        <!-- Header -->
+        <header class="header" id="header">
+            <div class="header-left">
+                <div class="header-logo">🎮</div>
+                <div class="header-info">
+                    <h1 id="serverName">Minecraft Server</h1>
+                    <div class="header-status">
+                        <div class="status-dot" id="statusDot"></div>
+                        <span id="statusText">Đang tải...</span>
+                    </div>
+                </div>
+            </div>
+            <div class="header-actions">
+                <button class="header-btn" id="btnStart" title="Khởi động"><i class="fas fa-play"></i></button>
+                <button class="header-btn" id="btnRestart" title="Restart"><i class="fas fa-redo"></i></button>
+                <button class="header-btn danger" id="btnStop" title="Dừng"><i class="fas fa-stop"></i></button>
+            </div>
+        </header>
+
+        <div class="page-container">
+            <!-- ========== DASHBOARD ========== -->
+            <div class="page active" id="page-home">
+                <h2 class="page-title"><span class="page-title-icon">📊</span>Tổng Quan</h2>
+                
+                <div class="stats-grid">
+                    <div class="stat-card highlight">
+                        <div class="stat-icon">👥</div>
+                        <div class="stat-value" id="playerCount">0</div>
+                        <div class="stat-label">Người chơi</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">⏱️</div>
+                        <div class="stat-value" id="serverUptime">--</div>
+                        <div class="stat-label">Thời gian</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">💻</div>
+                        <div class="stat-value" id="cpuUsage">0%</div>
+                        <div class="stat-label">CPU</div>
+                        <div class="stat-bar"><div class="stat-bar-fill" id="cpuBar"></div></div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🧠</div>
+                        <div class="stat-value" id="memUsage">0%</div>
+                        <div class="stat-label">RAM</div>
+                        <div class="stat-bar"><div class="stat-bar-fill" id="memBar"></div></div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header"><span class="card-title">⚡ Lệnh Nhanh</span></div>
+                    <div class="card-body">
+                        <div class="quick-actions">
+                            <button class="quick-btn" onclick="cmd('list')"><span class="icon">👥</span>Danh sách</button>
+                            <button class="quick-btn" onclick="cmd('save-all')"><span class="icon">💾</span>Lưu</button>
+                            <button class="quick-btn" onclick="cmd('time set day')"><span class="icon">☀️</span>Ngày</button>
+                            <button class="quick-btn" onclick="cmd('time set night')"><span class="icon">🌙</span>Đêm</button>
+                            <button class="quick-btn" onclick="cmd('weather clear')"><span class="icon">🌤️</span>Quang</button>
+                            <button class="quick-btn" onclick="cmd('weather rain')"><span class="icon">🌧️</span>Mưa</button>
+                            <button class="quick-btn" onclick="cmd('difficulty peaceful')"><span class="icon">😇</span>Peaceful</button>
+                            <button class="quick-btn danger" onclick="cmd('stop')"><span class="icon">🛑</span>Dừng</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">👥 Người Chơi Online</span>
+                        <button class="cmd-chip" onclick="cmd('list')"><i class="fas fa-sync-alt"></i></button>
+                    </div>
+                    <div class="card-body">
+                        <div id="dashPlayers"><div class="no-data"><div class="no-data-text">Không có người chơi online</div></div></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========== CONSOLE ========== -->
+            <div class="page" id="page-console">
+                <h2 class="page-title"><span class="page-title-icon">🖥️</span>Console</h2>
+
+                <div class="card" style="margin-bottom:16px">
+                    <div class="card-body">
+                        <div class="cmd-chips">
+                            <button class="cmd-chip" onclick="cmd('help')"><i class="fas fa-question-circle"></i> Help</button>
+                            <button class="cmd-chip" onclick="cmd('list')"><i class="fas fa-users"></i> List</button>
+                            <button class="cmd-chip" onclick="cmd('save-all')"><i class="fas fa-save"></i> Save</button>
+                            <button class="cmd-chip" onclick="promptCmd('op')"><i class="fas fa-crown"></i> OP</button>
+                            <button class="cmd-chip" onclick="promptCmd('deop')"><i class="fas fa-user"></i> DeOP</button>
+                            <button class="cmd-chip" onclick="promptTp()"><i class="fas fa-map-marker-alt"></i> TP</button>
+                            <button class="cmd-chip danger" onclick="promptCmd('kick')"><i class="fas fa-ban"></i> Kick</button>
+                            <button class="cmd-chip danger" onclick="promptCmd('ban')"><i class="fas fa-gavel"></i> Ban</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="console-box">
+                    <div class="console-output" id="console"></div>
+                    <div class="console-input-row">
+                        <input type="text" class="console-input" id="consoleInput" placeholder="Nhập lệnh Minecraft...">
+                        <button class="console-send" onclick="sendConsole()"><i class="fas fa-paper-plane"></i> Gửi</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========== PLAYERS ========== -->
+            <div class="page" id="page-players">
+                <h2 class="page-title"><span class="page-title-icon">👥</span>Người Chơi (<span id="onlineCount">0</span>)</h2>
+                <div class="player-list" id="playerList"><div class="no-data"><div class="no-data-text">Không có người chơi online</div></div></div>
+
+                <div class="card" style="margin-top:20px">
+                    <div class="card-header"><span class="card-title">⛔ Quản Lý Lệnh Cấm</span></div>
+                    <div class="card-body">
+                        <div class="cmd-chips">
+                            <button class="cmd-chip" onclick="cmd('banlist')"><i class="fas fa-list"></i> Danh sách</button>
+                            <button class="cmd-chip" onclick="promptCmd('pardon')"><i class="fas fa-check-circle"></i> Bỏ cấm</button>
+                            <button class="cmd-chip" onclick="promptCmd('ban-ip')"><i class="fas fa-network-wired"></i> Cấm IP</button>
+                            <button class="cmd-chip" onclick="cmd('whitelist list')"><i class="fas fa-clipboard-list"></i> Whitelist</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========== ITEMS ========== -->
+            <div class="page" id="page-items">
+                <h2 class="page-title"><span class="page-title-icon">🎁</span>Vật Phẩm</h2>
+                <div id="itemsContainer"></div>
+
+                <div class="give-panel" id="givePanel">
+                    <div class="give-panel-title">🎁 Cấp vật phẩm: <span id="selectedItemName">Chưa chọn</span></div>
+                    <div class="give-panel-row">
+                        <select id="givePlayer"><option value="">Chọn người chơi</option></select>
+                        <input type="number" id="giveAmount" value="1" min="1" max="64" placeholder="Số lượng">
+                    </div>
+                    <button class="give-panel-btn" onclick="giveSelectedItem()"><i class="fas fa-gift"></i> Cấp Vật Phẩm</button>
+                </div>
+
+                <div class="card" style="margin-top:20px">
+                    <div class="card-header"><span class="card-title">📦 Vật Phẩm Tùy Chỉnh</span></div>
+                    <div class="card-body">
+                        <div style="display:flex;flex-direction:column;gap:12px">
+                            <input type="text" id="customItem" placeholder="ID vật phẩm (vd: diamond, minecraft:iron_ingot)" style="padding:16px;background:var(--bg-secondary);border:1px solid var(--border);border-radius:10px;font-size:14px;color:var(--text-primary)">
+                            <button class="btn btn-primary" onclick="giveCustomItem()"><i class="fas fa-gift"></i> Cấp Vật Phẩm</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========== MAP ========== -->
+            <div class="page" id="page-map">
+                <h2 class="page-title"><span class="page-title-icon">🗺️</span>Bản Đồ Tọa Độ</h2>
+                <div class="map-wrapper">
+                    <div class="map-toolbar">
+                        <button class="cmd-chip" onclick="centerMap()"><i class="fas fa-crosshairs"></i> Spawn</button>
+                        <button class="cmd-chip" onclick="fitAllPlayers()"><i class="fas fa-users"></i> Tất cả</button>
+                        <button class="cmd-chip" onclick="CoordMap.render()"><i class="fas fa-sync-alt"></i> Refresh</button>
+                    </div>
+                    <div class="coord-map-container">
+                        <canvas id="coordCanvas"></canvas>
+                        <div id="playerInfoBox" class="player-info-box"></div>
+                    </div>
+                    <div class="map-controls">
+                        <button class="map-control-btn" onclick="zoomInMap()"><i class="fas fa-plus"></i></button>
+                        <button class="map-control-btn" onclick="zoomOutMap()"><i class="fas fa-minus"></i></button>
+                    </div>
+                    <div class="map-overlay map-info">Zoom: <span id="mapZoom">100%</span></div>
+                    <div class="map-overlay map-coords" id="mapCoords">X: 0, Z: 0</div>
+                </div>
+                <div class="card" style="margin-top:20px">
+                    <div class="card-header"><span class="card-title">📍 Vị Trí Người Chơi</span></div>
+                    <div class="card-body"><div id="mapPlayerList"><div class="no-data"><div class="no-data-text">Không có người chơi online</div></div></div></div>
+                </div>
+            </div>
+
+            <!-- ========== UPLOAD ========== -->
+            <div class="page" id="page-upload">
+                <h2 class="page-title"><span class="page-title-icon">📤</span>Upload Files</h2>
+                
+                <div class="upload-stats" id="uploadStats"></div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">📁 Danh sách file</span>
+                        <button class="cmd-chip" onclick="Upload.openUploadDialog()"><i class="fas fa-plus"></i> Upload</button>
+                    </div>
+                    <div class="card-body">
+                        <div class="upload-dropzone" id="uploadDropzone" onclick="Upload.openUploadDialog()">
+                            <div class="upload-dropzone-icon">📤</div>
+                            <div class="upload-dropzone-text">Kéo thả file vào đây hoặc click để chọn</div>
+                            <div class="upload-dropzone-hint">Hỗ trợ: .jar, .zip, .json, .yml, .properties (tối đa 100MB)</div>
+                        </div>
+                        <div class="upload-file-list" id="uploadFileList"></div>
+                    </div>
+                </div>
+
+                <div class="card" style="margin-top:20px">
+                    <div class="card-header"><span class="card-title">ℹ️ Hướng dẫn</span></div>
+                    <div class="card-body">
+                        <div class="info-text">
+                            <p><strong>🔧 Mods:</strong> Upload file .jar vào thư mục mods/</p>
+                            <p><strong>🔌 Plugins:</strong> Upload file .jar vào thư mục plugins/</p>
+                            <p><strong>📦 Datapacks:</strong> Upload file .zip vào world/datapacks/</p>
+                            <p><strong>⚙️ Config:</strong> Upload file cấu hình vào config/</p>
+                            <p><strong>🎨 Resource Packs:</strong> Upload file .zip vào resourcepacks/</p>
+                            <p style="color:var(--warning);margin-top:10px">⚠️ Cần restart server sau khi upload mods/plugins mới!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========== BROADCAST ========== -->
+            <div class="page" id="page-broadcast">
+                <h2 class="page-title"><span class="page-title-icon">📢</span>Thông Báo</h2>
+                <div class="broadcast-input-area">
+                    <input type="text" class="broadcast-input" id="broadcastMsg" placeholder="Nhập nội dung thông báo...">
+                    <div class="broadcast-btns">
+                        <button class="broadcast-btn" onclick="sendBroadcast()"><i class="fas fa-bullhorn"></i> Gửi</button>
+                        <button class="broadcast-btn" onclick="sendTitle()"><i class="fas fa-film"></i> Title</button>
+                        <button class="broadcast-btn" onclick="sendChat()"><i class="fas fa-comment-alt"></i> Chat</button>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header"><span class="card-title">⚡ Thông Báo Nhanh</span></div>
+                    <div class="card-body">
+                        <div class="cmd-chips">
+                            <button class="cmd-chip" onclick="quickBroadcast('Server restart sau 5 phút!')"><i class="fas fa-redo"></i> Restart 5p</button>
+                            <button class="cmd-chip" onclick="quickBroadcast('Chào mừng đến server!')"><i class="fas fa-hand-wave"></i> Chào mừng</button>
+                            <button class="cmd-chip" onclick="quickBroadcast('Sự kiện đang diễn ra!')"><i class="fas fa-party-horn"></i> Sự kiện</button>
+                            <button class="cmd-chip danger" onclick="quickBroadcast('CẢNH BÁO: Vi phạm sẽ bị ban!')"><i class="fas fa-exclamation-triangle"></i> Cảnh báo</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========== FILES ========== -->
+            <div class="page" id="page-files">
+                <h2 class="page-title"><span class="page-title-icon">📁</span>Tệp Tin</h2>
+                <div class="card" style="padding:0">
+                    <div class="file-header" id="filePath"></div>
+                    <div class="file-list" id="fileList"></div>
+                </div>
+            </div>
+
+            <!-- ========== SETTINGS ========== -->
+            <div class="page" id="page-settings">
+                <h2 class="page-title"><span class="page-title-icon">⚙️</span>Cài Đặt</h2>
+
+                <div class="settings-section">
+                    <div class="settings-title">Điều khiển Server</div>
+                    <div class="settings-grid">
+                        <button class="settings-btn" onclick="WS.send({action:'start'})"><span class="icon"><i class="fas fa-play"></i></span> Khởi động</button>
+                        <button class="settings-btn" onclick="WS.send({action:'restart'})"><span class="icon"><i class="fas fa-redo"></i></span> Restart</button>
+                        <button class="settings-btn danger" onclick="WS.send({action:'stop'})"><span class="icon"><i class="fas fa-stop"></i></span> Dừng</button>
+                        <button class="settings-btn danger" onclick="if(confirm('Buộc dừng?'))WS.send({action:'kill'})"><span class="icon"><i class="fas fa-skull"></i></span> Buộc dừng</button>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <div class="settings-title">Game Rules</div>
+                    <div class="settings-grid">
+                        <button class="settings-btn" onclick="cmd('save-all')"><span class="icon"><i class="fas fa-save"></i></span> Lưu thế giới</button>
+                        <button class="settings-btn" onclick="cmd('whitelist on')"><span class="icon"><i class="fas fa-check-circle"></i></span> Bật whitelist</button>
+                        <button class="settings-btn" onclick="cmd('whitelist off')"><span class="icon"><i class="fas fa-times-circle"></i></span> Tắt whitelist</button>
+                        <button class="settings-btn" onclick="cmd('gamerule keepInventory true')"><span class="icon"><i class="fas fa-suitcase"></i></span> Giữ đồ: BẬT</button>
+                        <button class="settings-btn" onclick="cmd('gamerule keepInventory false')"><span class="icon"><i class="fas fa-suitcase"></i></span> Giữ đồ: TẮT</button>
+                        <button class="settings-btn" onclick="cmd('gamerule doDaylightCycle false')"><span class="icon"><i class="fas fa-clock"></i></span> Dừng thời gian</button>
+                        <button class="settings-btn" onclick="cmd('gamerule doMobSpawning false')"><span class="icon"><i class="fas fa-ghost"></i></span> Tắt mob</button>
+                        <button class="settings-btn" onclick="cmd('gamerule doMobSpawning true')"><span class="icon"><i class="fas fa-ghost"></i></span> Bật mob</button>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <div class="settings-title">Thông Tin Hệ Thống</div>
+                    <div class="info-card">
+                        <div class="info-row"><span class="info-label">Nền tảng</span><span class="info-value" id="infoPlatform">--</span></div>
+                        <div class="info-row"><span class="info-label">Hostname</span><span class="info-value" id="infoHostname">--</span></div>
+                        <div class="info-row"><span class="info-label">CPU Cores</span><span class="info-value" id="infoCores">--</span></div>
+                        <div class="info-row"><span class="info-label">Tổng RAM</span><span class="info-value" id="infoRAM">--</span></div>
+                        <div class="info-row"><span class="info-label">Thư mục</span><span class="info-value" id="infoDir" style="font-size:12px">--</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav">
+            <div class="nav-item active" data-page="home"><span class="icon"><i class="fas fa-home"></i></span><span>Tổng quan</span></div>
+            <div class="nav-item" data-page="console"><span class="icon"><i class="fas fa-terminal"></i></span><span>Console</span></div>
+            <div class="nav-item-wrapper">
+                <div class="nav-item" data-page="players"><span class="icon"><i class="fas fa-users"></i></span><span>Người chơi</span></div>
+                <span class="nav-badge" id="playerBadge">0</span>
+            </div>
+            <div class="nav-item" data-page="items"><span class="icon"><i class="fas fa-gift"></i></span><span>Vật phẩm</span></div>
+            <div class="nav-item" data-page="more"><span class="icon"><i class="fas fa-ellipsis-h"></i></span><span>Thêm</span></div>
+        </nav>
+    </div>
+
+    <!-- More Menu Modal -->
+    <div class="modal-overlay" id="moreModal">
+        <div class="modal">
+            <div class="modal-header">
+                <span class="modal-title">Tính năng khác</span>
+                <button class="modal-close" onclick="closeMoreModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="settings-grid">
+                    <button class="settings-btn full" onclick="switchPage('map');closeMoreModal()"><span class="icon"><i class="fas fa-map"></i></span> Bản đồ</button>
+                    <button class="settings-btn full" onclick="switchPage('upload');closeMoreModal()"><span class="icon"><i class="fas fa-upload"></i></span> Upload Mods</button>
+                    <button class="settings-btn full" onclick="switchPage('broadcast');closeMoreModal()"><span class="icon"><i class="fas fa-bullhorn"></i></span> Thông báo</button>
+                    <button class="settings-btn full" onclick="switchPage('files');closeMoreModal()"><span class="icon"><i class="fas fa-folder"></i></span> Tệp tin</button>
+                    <button class="settings-btn full" onclick="switchPage('settings');closeMoreModal()"><span class="icon"><i class="fas fa-cog"></i></span> Cài đặt</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Editor Modal -->
+    <div class="modal-overlay" id="editorModal">
+        <div class="modal">
+            <div class="modal-header">
+                <span class="modal-title" id="editorTitle">Chỉnh sửa tệp</span>
+                <button class="modal-close" onclick="closeEditor()">×</button>
+            </div>
+            <div class="modal-body">
+                <textarea class="editor-textarea" id="editor" spellcheck="false"></textarea>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeEditor()"><i class="fas fa-times"></i> Hủy</button>
+                <button class="btn btn-primary" onclick="saveFile()"><i class="fas fa-save"></i> Lưu</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/app.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/console.js"></script>
+    <script src="js/players.js"></script>
+    <script src="js/items.js"></script>
+    <script src="js/files.js"></script>
+    <script src="js/broadcast.js"></script>
+    <script src="js/coordmap.js"></script>
+    <script src="js/upload.js"></script>
+</body>
+</html>
