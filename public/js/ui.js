@@ -72,6 +72,28 @@ const UI = {
 
     hideModal(id) {
         document.getElementById(id).classList.remove('show');
+    },
+
+    // ==================== LOADING ====================
+    setLoading(elementId, isLoading) {
+        const el = document.getElementById(elementId);
+        if (!el) return;
+
+        if (isLoading) {
+            el.classList.add('loading-state');
+            el.disabled = true;
+            // Store original text if not already stored
+            if (!el.dataset.originalText) {
+                el.dataset.originalText = el.innerHTML;
+            }
+            el.innerHTML = '<span class="loading"></span>';
+        } else {
+            el.classList.remove('loading-state');
+            el.disabled = false;
+            if (el.dataset.originalText) {
+                el.innerHTML = el.dataset.originalText;
+            }
+        }
     }
 };
 
