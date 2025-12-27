@@ -51,7 +51,12 @@ class UploadManager {
         }
         
         // Kiểm tra tên file an toàn
-        const safeName = filename.replace(/[^a-zA-Z0-9._-]/g, '_');
+        // Ensure we only have the filename, strip any path
+        let baseName = path.basename(filename);
+
+        // Sanitize filename
+        const safeName = baseName.replace(/[^a-zA-Z0-9._-]/g, '_');
+
         if (safeName !== filename) {
             return { valid: true, warning: 'Tên file đã được chuẩn hóa', safeName };
         }

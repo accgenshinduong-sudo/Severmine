@@ -21,15 +21,34 @@ const AppState = {
 
 // ==================== WEBSOCKET ====================
 const WS = {
+    reconnectAttempts: 0,
+    isConnecting: false,
+
     connect() {
+        if (this.isConnecting) return;
+        this.isConnecting = true;
+
         const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
         AppState.ws = new WebSocket(`${protocol}//${location.host}`);
         
-        AppState.ws.onopen = () => console.log('✅ WebSocket connected');
+        AppState.ws.onopen = () => {
+            console.log('✅ WebSocket connected');
+            this.reconnectAttempts = 0;
+            this.isConnecting = false;
+        };
+
         AppState.ws.onclose = () => {
             AppState.auth = false;
-            setTimeout(() => WS.connect(), 3000);
+            this.isConnecting = false;
+
+            // Exponential backoff: 3s, 6s, 12s, 24s, 30s (max)
+            const delay = Math.min(3000 * Math.pow(2, this.reconnectAttempts), 30000);
+            console.log(`🔌 WebSocket disconnected. Reconnecting in ${delay/1000}s...`);
+
+            this.reconnectAttempts++;
+            setTimeout(() => WS.connect(), delay);
         };
+
         AppState.ws.onmessage = (e) => WS.handleMessage(JSON.parse(e.data));
     },
 

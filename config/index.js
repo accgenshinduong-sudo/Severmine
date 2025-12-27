@@ -68,3 +68,8 @@ module.exports = {
         editableExtensions: ['txt', 'json', 'yml', 'yaml', 'properties', 'log', 'cfg', 'conf', 'md']
     }
 };
+
+// Check for default password
+if (module.exports.auth.password === '12022001A@') {
+    console.warn('\x1b[33m%s\x1b[0m', '⚠️  WARNING: You are using the default password. Please change it in config/index.js or set the PASSWORD environment variable.');
+}

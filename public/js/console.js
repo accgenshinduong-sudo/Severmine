@@ -16,13 +16,17 @@ const Console = {
     addLog(log) {
         if (!this.element) this.init();
         
+        // Check if user is scrolled near bottom BEFORE adding new content
+        // Tolerance of 50px
+        const isAtBottom = this.element.scrollHeight - this.element.scrollTop - this.element.clientHeight < 50;
+
         const line = document.createElement('div');
         line.className = `console-line ${log.level}`;
         line.textContent = log.text;
         this.element.appendChild(line);
         
-        // Auto scroll if near bottom
-        if (this.element.scrollHeight - this.element.scrollTop < this.element.clientHeight + 150) {
+        // Auto scroll if was at bottom
+        if (isAtBottom) {
             this.scrollToBottom();
         }
         
