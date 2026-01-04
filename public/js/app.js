@@ -25,9 +25,13 @@ const WS = {
         const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
         AppState.ws = new WebSocket(`${protocol}//${location.host}`);
         
-        AppState.ws.onopen = () => console.log('✅ WebSocket connected');
+        AppState.ws.onopen = () => {
+            console.log('✅ WebSocket connected');
+            document.getElementById('disconnectOverlay').classList.add('hidden');
+        };
         AppState.ws.onclose = () => {
             AppState.auth = false;
+            document.getElementById('disconnectOverlay').classList.remove('hidden');
             setTimeout(() => WS.connect(), 3000);
         };
         AppState.ws.onmessage = (e) => WS.handleMessage(JSON.parse(e.data));
